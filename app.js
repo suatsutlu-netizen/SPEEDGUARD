@@ -108,29 +108,37 @@ function setSpeed(val) {
 
   // speed display
   const sv = document.getElementById('speed-val');
-  sv.textContent = currentSpeed;
-  sv.className   = 'speed-value' + (state !== 'ok' ? ' ' + state : '');
+  if (sv) {
+    sv.textContent = currentSpeed;
+    sv.className   = 'speed-value' + (state !== 'ok' ? ' ' + state : '');
+  }
 
   // proximity bar
   const bar = document.getElementById('prox-bar');
-  bar.style.width   = Math.min(100, Math.round(currentSpeed / 160 * 100)) + '%';
-  bar.className     = 'prox-bar-fill' + (state !== 'ok' ? ' ' + state : '');
+  if (bar) {
+    bar.style.width   = Math.min(100, Math.round(currentSpeed / 160 * 100)) + '%';
+    bar.className     = 'prox-bar-fill' + (state !== 'ok' ? ' ' + state : '');
+  }
 
   // margin stat
   const margin  = Math.max(0, limit - currentSpeed);
   const mEl     = document.getElementById('margin-stat');
-  mEl.textContent = margin;
-  mEl.className   = 'stat-num' + (state !== 'ok' ? ' ' + state : '');
+  if (mEl) {
+    mEl.textContent = margin;
+    mEl.className   = 'stat-num' + (state !== 'ok' ? ' ' + state : '');
+  }
 
   // state badge
   const badge = document.getElementById('state-badge');
-  const labels = { ok: 'ZONE SÛRE', warn: 'AVERTISSEMENT', alert: 'ALERTE VITESSE' };
-  badge.textContent = labels[state];
-  badge.className   = 'state-badge' + (state !== 'ok' ? ' ' + state : '');
+  if (badge) {
+    const labels = { ok: 'ZONE SÛRE', warn: 'AVERTISSEMENT', alert: 'ALERTE VITESSE' };
+    badge.textContent = labels[state];
+    badge.className   = 'state-badge' + (state !== 'ok' ? ' ' + state : '');
+  }
 
   // status dot
   const dot = document.getElementById('status-dot');
-  dot.className = 'status-dot' + (state !== 'ok' ? ' ' + state : '');
+  if (dot) dot.className = 'status-dot' + (state !== 'ok' ? ' ' + state : '');
 
   // sound trigger on state change
   if (state !== lastState) {
@@ -147,7 +155,6 @@ function startGPS() {
   if (!navigator.geolocation) return;
   watchId = navigator.geolocation.watchPosition(
     (pos) => {
-      // speed in m/s → km/h
       const kmh = pos.coords.speed != null
         ? Math.round(pos.coords.speed * 3.6)
         : 0;
@@ -165,8 +172,10 @@ function changeLimit(delta) {
   limit = next;
   localStorage.setItem('sg_limit', limit);
 
-  document.getElementById('limit-val').textContent  = limit + ' KM/H';
-  document.getElementById('limit-stat').textContent = limit;
+  const lVal = document.getElementById('limit-val');
+  const lStat = document.getElementById('limit-stat');
+  if (lVal) lVal.textContent = limit + ' KM/H';
+  if (lStat) lStat.textContent = limit;
 
   const btnMinus = document.getElementById('btn-minus');
   const btnPlus  = document.getElementById('btn-plus');
@@ -174,8 +183,7 @@ function changeLimit(delta) {
   
   if (btnMinus) btnMinus.disabled = limit <= MIN_LIMIT;
   if (btnPlus)  btnPlus.disabled  = limit >= MAX_LIMIT;
-  
-  badge.className = 'min-badge' + (limit <= MIN_LIMIT ? ' active' : '');
+  if (badge)    badge.className = 'min-badge' + (limit <= MIN_LIMIT ? ' active' : '');
 
   // re-evaluate state
   lastState = '';
@@ -188,10 +196,10 @@ function toggleAlarm() {
   localStorage.setItem('sg_alarm', alarmOn ? 'on' : 'off');
 
   const tog = document.getElementById('alarm-toggle');
-  tog.className = 'toggle-wrap' + (alarmOn ? ' on' : '');
+  if (tog) tog.className = 'toggle-wrap' + (alarmOn ? ' on' : '');
 
-  document.getElementById('alarm-text').textContent =
-    alarmOn ? MODES[modeIdx] : 'DÉSACTIVÉE';
+  const aText = document.getElementById('alarm-text');
+  if (aText) aText.textContent = alarmOn ? MODES[modeIdx] : 'DÉSACTIVÉE';
 
   if (!alarmOn) stopAllSounds();
   else { lastState = ''; setSpeed(currentSpeed); }
@@ -201,9 +209,12 @@ function toggleAlarm() {
 function muteAlarm() {
   muted = !muted;
   const btn = document.getElementById('mute-btn');
-  btn.className = 'mute-btn' + (muted ? ' muted' : '');
-  document.getElementById('mute-icon').textContent  = muted ? '🔇' : '🔊';
-  document.getElementById('mute-label').textContent = muted ? 'RÉACTIVER' : 'COUPER';
+  if (btn) btn.className = 'mute-btn' + (muted ? ' muted' : '');
+  
+  const mIcon = document.getElementById('mute-icon');
+  const mLabel = document.getElementById('mute-label');
+  if (mIcon) mIcon.textContent  = muted ? '🔇' : '🔊';
+  if (mLabel) mLabel.textContent = muted ? 'RÉACTIVER' : 'COUPER';
 
   if (muted) stopAllSounds();
   else { lastState = ''; setSpeed(currentSpeed); }
@@ -214,8 +225,11 @@ function cycleMode() {
   modeIdx = (modeIdx + 1) % MODES.length;
   localStorage.setItem('sg_mode', modeIdx);
   const name = MODES[modeIdx];
-  document.getElementById('mode-val').textContent  = name;
-  document.getElementById('alarm-text').textContent = alarmOn ? name : 'DÉSACTIVÉE';
+  
+  const mVal = document.getElementById('mode-val');
+  const aText = document.getElementById('alarm-text');
+  if (mVal) mVal.textContent  = name;
+  if (aText) aText.textContent = alarmOn ? name : 'DÉSACTIVÉE';
 
   if (lastState !== 'ok') {
     stopAllSounds();
@@ -227,12 +241,14 @@ function cycleMode() {
 function saveLimit() {
   localStorage.setItem('sg_limit', limit);
   const el = document.getElementById('save-val');
-  el.textContent = '✓ ' + limit + ' SAUVEGARDÉ';
-  el.style.color = '#2aff7a';
-  setTimeout(() => {
-    el.textContent = 'ENREGISTRER';
-    el.style.color = '';
-  }, 2000);
+  if (el) {
+    el.textContent = '✓ ' + limit + ' SAUVEGARDÉ';
+    el.style.color = '#2aff7a';
+    setTimeout(() => {
+      el.textContent = 'ENREGISTRER';
+      el.style.color = '';
+    }, 2000);
+  }
 }
 
 // ── PWA INSTALL ───────────────────────────────────────────────────────────
@@ -241,20 +257,25 @@ let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  document.getElementById('install-banner').classList.add('visible');
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.classList.add('visible');
 });
 
-document.getElementById('install-btn') &&
-document.getElementById('install-btn').addEventListener('click', async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  document.getElementById('install-banner').classList.remove('visible');
-});
+const instBtn = document.getElementById('install-btn');
+if (instBtn) {
+  instBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    const banner = document.getElementById('install-banner');
+    if (banner) banner.classList.remove('visible');
+  });
+}
 
 function dismissInstall() {
-  document.getElementById('install-banner').classList.remove('visible');
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.classList.remove('visible');
 }
 
 // ── OFFLINE / ONLINE ──────────────────────────────────────────────────────
@@ -283,17 +304,20 @@ window.addEventListener('online', () => {
 
 if (!navigator.onLine) showOfflineToast();
 
-// ── SERVICE WORKER (CORRIGÉ POUR GITHUB PAGES) ───────────────────────────
+// ── NETTOYAGE FORCÉ DES SERVICE WORKERS BLOQUÉS ─────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // Utilisation obligatoire du chemin relatif './sw.js'
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('SW registered with scope:', reg.scope))
-      .catch(err => console.warn('SW failed:', err));
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister().then(() => {
+          console.log('Ancien Service Worker nettoyé pour éviter la 404.');
+        });
+      }
+    });
   });
 }
 
-// ── WAKE LOCK (screen stays on) ───────────────────────────────────────────
+// ── WAKE LOCK (Gestion maintien écran allumé) ───────────────────────────────
 async function requestWakeLock() {
   if ('wakeLock' in navigator) {
     try {
@@ -308,14 +332,18 @@ document.addEventListener('visibilitychange', () => {
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 (function init() {
-  // restore saved state
-  document.getElementById('limit-val').textContent  = limit + ' KM/H';
-  document.getElementById('limit-stat').textContent = limit;
+  const lVal = document.getElementById('limit-val');
+  const lStat = document.getElementById('limit-stat');
+  if (lVal) lVal.textContent = limit + ' KM/H';
+  if (lStat) lStat.textContent = limit;
 
   const tog = document.getElementById('alarm-toggle');
   if (tog) tog.className = 'toggle-wrap' + (alarmOn ? ' on' : '');
-  document.getElementById('alarm-text').textContent = alarmOn ? MODES[modeIdx] : 'DÉSACTIVÉE';
-  document.getElementById('mode-val').textContent   = MODES[modeIdx];
+  
+  const aText = document.getElementById('alarm-text');
+  const mVal = document.getElementById('mode-val');
+  if (aText) aText.textContent = alarmOn ? MODES[modeIdx] : 'DÉSACTIVÉE';
+  if (mVal) mVal.textContent   = MODES[modeIdx];
 
   const btnMinus = document.getElementById('btn-minus');
   const btnPlus  = document.getElementById('btn-plus');
@@ -325,7 +353,6 @@ document.addEventListener('visibilitychange', () => {
   if (btnPlus)  btnPlus.disabled  = limit >= MAX_LIMIT;
   if (badge)    badge.className = 'min-badge' + (limit <= MIN_LIMIT ? ' active' : '');
 
-  // try GPS; fallback demo mode if no permission
   if (navigator.geolocation) {
     navigator.permissions && navigator.permissions.query({ name: 'geolocation' })
       .then(result => {
