@@ -1,12 +1,12 @@
 const CACHE_NAME = 'speedguard-v1';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/app.js',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/icon-apple.png',
+  './',
+  './index.html',
+  './app.js',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-apple.png',
   'https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap'
 ];
 
@@ -62,12 +62,12 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => {
-          // Fallback to index.html for navigation
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
-        });
+          .catch(() => {
+            // Fallback to index.html for navigation - FIX CHEMIN RELATIF ICI AUSSI
+            if (event.request.mode === 'navigate') {
+              return caches.match('./index.html');
+            }
+          });
     })
   );
 });
