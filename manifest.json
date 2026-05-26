@@ -2,8 +2,8 @@
   "name": "SpeedGuard HUD",
   "short_name": "SpeedGuard",
   "description": "Tachymètre numérique avec alertes de vitesse configurables",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": "index.html",
+  "scope": "",
   "display": "standalone",
   "background_color": "#080c14",
   "theme_color": "#080c14",
@@ -70,19 +70,19 @@
     {
       "name": "Limite 50 km/h",
       "short_name": "50 km/h",
-      "url": "./index.html?limit=50",
+      "url": "index.html?limit=50",
       "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
     },
     {
       "name": "Limite 90 km/h",
       "short_name": "90 km/h",
-      "url": "./index.html?limit=90",
+      "url": "index.html?limit=90",
       "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
     },
     {
       "name": "Limite 130 km/h",
       "short_name": "130 km/h",
-      "url": "./index.html?limit=130",
+      "url": "index.html?limit=130",
       "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
     }
   ]
