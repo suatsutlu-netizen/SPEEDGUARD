@@ -1,12 +1,12 @@
 'use strict';
 
 // ── STATE ──────────────────────────────────────────────────────────────────
-let limit       = parseInt(localStorage.getItem('sg_limit') || '110');
-let alarmOn     = localStorage.getItem('sg_alarm') !== 'off';
-let muted       = false;
+let limit        = parseInt(localStorage.getItem('sg_limit') || '110');
+let alarmOn      = localStorage.getItem('sg_alarm') !== 'off';
+let muted        = false;
 let currentSpeed = 0;
-let lastState   = 'ok';
-let modeIdx     = parseInt(localStorage.getItem('sg_mode') || '0');
+let lastState    = 'ok';
+let modeIdx      = parseInt(localStorage.getItem('sg_mode') || '0');
 
 const MODES = ['BIP CADENCÉ', 'ALARME CONTINUE', 'BIP RAPIDE'];
 const MIN_LIMIT = 10;
@@ -168,10 +168,14 @@ function changeLimit(delta) {
   document.getElementById('limit-val').textContent  = limit + ' KM/H';
   document.getElementById('limit-stat').textContent = limit;
 
-  const btn   = document.getElementById('btn-minus');
-  const badge = document.getElementById('min-badge');
-  btn.disabled        = limit <= MIN_LIMIT;
-  badge.className     = 'min-badge' + (limit <= MIN_LIMIT ? ' active' : '');
+  const btnMinus = document.getElementById('btn-minus');
+  const btnPlus  = document.getElementById('btn-plus');
+  const badge    = document.getElementById('min-badge');
+  
+  if (btnMinus) btnMinus.disabled = limit <= MIN_LIMIT;
+  if (btnPlus)  btnPlus.disabled  = limit >= MAX_LIMIT;
+  
+  badge.className = 'min-badge' + (limit <= MIN_LIMIT ? ' active' : '');
 
   // re-evaluate state
   lastState = '';
@@ -257,29 +261,34 @@ function dismissInstall() {
 const toast = document.getElementById('offline-toast');
 
 function showOfflineToast() {
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
+  if (toast) {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
 }
 
 window.addEventListener('offline', showOfflineToast);
 window.addEventListener('online', () => {
-  toast.textContent = 'RECONNECTÉ';
-  toast.style.color = '#2aff7a';
-  toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.remove('show');
-    toast.textContent = 'MODE HORS LIGNE';
-    toast.style.color = '';
-  }, 2500);
+  if (toast) {
+    toast.textContent = 'RECONNECTÉ';
+    toast.style.color = '#2aff7a';
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+      toast.textContent = 'MODE HORS LIGNE';
+      toast.style.color = '';
+    }, 2500);
+  }
 });
 
 if (!navigator.onLine) showOfflineToast();
 
-// ── SERVICE WORKER ────────────────────────────────────────────────────────
+// ── SERVICE WORKER (CORRIGÉ POUR GITHUB PAGES) ───────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
+    // Utilisation obligatoire du chemin relatif './sw.js'
     navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('SW registered:', reg.scope))
+      .then(reg => console.log('SW registered with scope:', reg.scope))
       .catch(err => console.warn('SW failed:', err));
   });
 }
@@ -304,14 +313,17 @@ document.addEventListener('visibilitychange', () => {
   document.getElementById('limit-stat').textContent = limit;
 
   const tog = document.getElementById('alarm-toggle');
-  tog.className = 'toggle-wrap' + (alarmOn ? ' on' : '');
+  if (tog) tog.className = 'toggle-wrap' + (alarmOn ? ' on' : '');
   document.getElementById('alarm-text').textContent = alarmOn ? MODES[modeIdx] : 'DÉSACTIVÉE';
   document.getElementById('mode-val').textContent   = MODES[modeIdx];
 
-  const btn   = document.getElementById('btn-minus');
-  const badge = document.getElementById('min-badge');
-  btn.disabled    = limit <= MIN_LIMIT;
-  badge.className = 'min-badge' + (limit <= MIN_LIMIT ? ' active' : '');
+  const btnMinus = document.getElementById('btn-minus');
+  const btnPlus  = document.getElementById('btn-plus');
+  const badge    = document.getElementById('min-badge');
+  
+  if (btnMinus) btnMinus.disabled = limit <= MIN_LIMIT;
+  if (btnPlus)  btnPlus.disabled  = limit >= MAX_LIMIT;
+  if (badge)    badge.className = 'min-badge' + (limit <= MIN_LIMIT ? ' active' : '');
 
   // try GPS; fallback demo mode if no permission
   if (navigator.geolocation) {
